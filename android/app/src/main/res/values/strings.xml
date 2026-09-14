@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CampusMeal</string>
+    <string name="foundation_ready">CampusMeal Android foundation ready</string>
+    <string name="route_placeholder">%1$s route pending implementation</string>
+</resources>

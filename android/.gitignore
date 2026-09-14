@@ -1,0 +1,18 @@
+.gradle/
+.kotlin/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Machine-specific configuration: SDK path and local backend URL overrides.
+local.properties
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Signing material must never be committed.
+*.jks
+*.keystore

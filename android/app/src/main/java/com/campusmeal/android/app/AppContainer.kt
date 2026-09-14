@@ -1,0 +1,64 @@
+package com.campusmeal.android.app
+
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.campusmeal.android.BuildConfig
+import com.campusmeal.android.core.analytics.AnalyticsTracker
+import com.campusmeal.android.core.analytics.NoOpAnalyticsTracker
+import com.campusmeal.android.core.database.CampusMealDatabase
+import com.campusmeal.android.core.datastore.CampusMealPreferences
+import com.campusmeal.android.core.location.FusedLocationProvider
+import com.campusmeal.android.core.location.LocationProvider
+import com.campusmeal.android.core.network.ApiClientFactory
+import com.campusmeal.android.core.network.NetworkConfig
+import com.campusmeal.android.core.session.InMemorySessionStorage
+import com.campusmeal.android.core.session.SessionRepository
+import com.campusmeal.android.core.session.SessionStorage
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+
+/**
+ * Manual dependency container for the prototype. Features receive dependencies from here
+ * instead of constructing them, so a DI framework can replace this later without touching them.
+ */
+interface AppContainer {
+    val networkConfig: NetworkConfig
+    val okHttpClient: OkHttpClient
+    val retrofit: Retrofit
+    val database: CampusMealDatabase
+    val preferences: DataStore<Preferences>
+    val sessionStorage: SessionStorage
+    val sessionRepository: SessionRepository
+    val locationProvider: LocationProvider
+    val analyticsTracker: AnalyticsTracker
+}
+
+class DefaultAppContainer(context: Context) : AppContainer {
+
+    private val appContext = context.applicationContext
+
+    override val networkConfig: NetworkConfig by lazy {
+        NetworkConfig(
+            baseUrl = BuildConfig.API_BASE_URL,
+            httpLoggingEnabled = BuildConfig.DEBUG,
+        )
+    }
+
+    override val okHttpClient: OkHttpClient by lazy { ApiClientFactory.createOkHttpClient(networkConfig) }
+
+    override val retrofit: Retrofit by lazy { ApiClientFactory.createRetrofit(networkConfig, okHttpClient) }
+
+    override val database: CampusMealDatabase by lazy { CampusMealDatabase.create(appContext) }
+
+    override val preferences: DataStore<Preferences> by lazy { CampusMealPreferences.dataStore(appContext) }
+
+    // PENDING: replace with an Android Keystore-backed implementation before real login ships.
+    override val sessionStorage: SessionStorage by lazy { InMemorySessionStorage() }
+
+    override val sessionRepository: SessionRepository by lazy { SessionRepository(sessionStorage) }
+
+    override val locationProvider: LocationProvider by lazy { FusedLocationProvider(appContext) }
+
+    override val analyticsTracker: AnalyticsTracker by lazy { NoOpAnalyticsTracker() }
+}

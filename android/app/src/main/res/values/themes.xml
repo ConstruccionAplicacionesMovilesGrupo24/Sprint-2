@@ -1,0 +1,4 @@
+<resources>
+    <!-- Window theme only; in-app styling comes from CampusMealTheme in Compose. -->
+    <style name="Theme.CampusMeal" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
