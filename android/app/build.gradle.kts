@@ -62,6 +62,11 @@ android {
         compose = true
         buildConfig = true
     }
+
+    sourceSets {
+        // Exported Room schemas let MigrationTestHelper validate migrations in instrumented tests.
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
 }
 
 kotlin {
@@ -130,4 +135,5 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.room.testing)
 }

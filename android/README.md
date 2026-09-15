@@ -18,7 +18,9 @@ This is the **bootstrap foundation**. It holds the project configuration, depend
 `gradle/gradle-daemon-jvm.properties` requires a Java 17 daemon.
 
 - **Android Studio:** open *Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK* and choose a JDK 17. If none is installed, pick *Download JDK… → version 17*.
-- **Command line:** set `JAVA_HOME` to a JDK 17 installation.
+- **Command line:** Gradle picks a detected JDK 17 for the daemon (for example one under `~/.jdks`). If none is detected, set `JAVA_HOME` to a JDK 17 installation.
+
+Command-line builds also need the Android SDK location. Android Studio writes it to `android/local.properties` (`sdk.dir=...`) on the first sync. Without Studio, set `ANDROID_HOME` or create that file yourself; otherwise Gradle fails with "SDK location not found".
 
 If the API 37 platform is missing and the SDK licenses have been accepted, AGP downloads it on the first build. Otherwise install it from *SDK Manager*, or run `sdkmanager "platforms;android-37.0"`.
 
@@ -61,13 +63,15 @@ android/
         │   │   ├── datastore/  Preferences DataStore instance
         │   │   ├── designsystem/ CampusMealTheme, temporary color/type tokens
         │   │   ├── location/   LocationProvider boundary (fused, foreground only)
-        │   │   ├── network/    NetworkConfig and ApiClientFactory (OkHttp + Retrofit)
+        │   │   ├── network/    NetworkConfig, ApiClientFactory (OkHttp + Retrofit), ApiResult/apiCall
         │   │   └── session/    SessionStorage boundary and SessionRepository
         │   └── navigation/     Type-safe route contract and NavHost
         ├── debug/res/xml/      Debug-only network security config (local cleartext)
         ├── test/               JVM unit tests
-        └── androidTest/        Compose UI tests
+        └── androidTest/        Compose UI and Room instrumented tests
 ```
+
+Contribution notes for individual issues live in [`docs/`](docs/).
 
 Feature packages (`feature/auth`, `feature/inventory`, `feature/context`, `feature/restaurants`, `feature/decision`, `feature/profile`) are created along with their first real source files. Empty placeholder packages are not kept.
 
@@ -80,7 +84,7 @@ Run all commands from the `android/` directory. On Windows, use `gradlew.bat` or
 ./gradlew :app:assembleDebug                # build the debug APK
 ./gradlew :app:testDebugUnitTest            # JVM unit tests
 ./gradlew :app:lintDebug                    # Android lint
-./gradlew :app:connectedDebugAndroidTest    # Compose UI tests (needs a device or emulator)
+./gradlew :app:connectedDebugAndroidTest    # instrumented tests: Compose UI, Room (needs a device or emulator)
 ```
 
 ## Backend URL configuration

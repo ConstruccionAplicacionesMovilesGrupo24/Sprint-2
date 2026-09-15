@@ -23,6 +23,12 @@ interface CacheMetadataDao {
     @Query("SELECT * FROM cache_metadata WHERE cacheKey = :cacheKey")
     fun observe(cacheKey: String): Flow<CacheMetadataEntity?>
 
+    @Query("SELECT * FROM cache_metadata WHERE cacheKey = :cacheKey")
+    suspend fun get(cacheKey: String): CacheMetadataEntity?
+
+    @Query("DELETE FROM cache_metadata WHERE cacheKey = :cacheKey")
+    suspend fun delete(cacheKey: String)
+
     @Query("DELETE FROM cache_metadata")
     suspend fun clear()
 }

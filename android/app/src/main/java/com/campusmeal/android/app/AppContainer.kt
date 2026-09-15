@@ -12,9 +12,15 @@ import com.campusmeal.android.core.location.FusedLocationProvider
 import com.campusmeal.android.core.location.LocationProvider
 import com.campusmeal.android.core.network.ApiClientFactory
 import com.campusmeal.android.core.network.NetworkConfig
+import com.campusmeal.android.core.session.AuthorizationHeaderProvider
 import com.campusmeal.android.core.session.InMemorySessionStorage
+import com.campusmeal.android.core.session.SessionAuthorizationHeaderProvider
 import com.campusmeal.android.core.session.SessionRepository
 import com.campusmeal.android.core.session.SessionStorage
+import com.campusmeal.android.feature.inventory.data.local.RoomInventoryCache
+import com.campusmeal.android.feature.inventory.data.remote.InventoryApi
+import com.campusmeal.android.feature.inventory.data.repository.OfflineFirstInventoryRepository
+import com.campusmeal.android.feature.inventory.domain.repository.InventoryRepository
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 
@@ -32,6 +38,8 @@ interface AppContainer {
     val sessionRepository: SessionRepository
     val locationProvider: LocationProvider
     val analyticsTracker: AnalyticsTracker
+    val authorizationHeaderProvider: AuthorizationHeaderProvider
+    val inventoryRepository: InventoryRepository
 }
 
 class DefaultAppContainer(context: Context) : AppContainer {
@@ -61,4 +69,16 @@ class DefaultAppContainer(context: Context) : AppContainer {
     override val locationProvider: LocationProvider by lazy { FusedLocationProvider(appContext) }
 
     override val analyticsTracker: AnalyticsTracker by lazy { NoOpAnalyticsTracker() }
+
+    override val authorizationHeaderProvider: AuthorizationHeaderProvider by lazy {
+        SessionAuthorizationHeaderProvider(sessionStorage)
+    }
+
+    override val inventoryRepository: InventoryRepository by lazy {
+        OfflineFirstInventoryRepository(
+            api = retrofit.create(InventoryApi::class.java),
+            authorizationHeaderProvider = authorizationHeaderProvider,
+            cache = RoomInventoryCache(database),
+        )
+    }
 }
